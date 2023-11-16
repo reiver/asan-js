@@ -42,11 +42,11 @@ THE SOFTWARE.
 // It then fetches the HTML from the 'src' path.
 // It then includes the HTML it fetched from the 'src' path here into the 'dst'.
 // It then sets the title of the page to the inner-text for the first <h1> from the 'src'.
-export function include(element) {
+export async function include(element) {
 	log("begin")
 
 	if (undefined === element) {
-		log("element is undefined")
+		logerror("element is undefined")
 		log("end")
 		return
 	}
@@ -54,45 +54,25 @@ export function include(element) {
 	let dst = window.location.pathname
 	let src = "/src" + dst
 
-	log("dst-path: ", dst)
-	log("src-path: ", src)
+	log("dst-path:", JSON.stringify(dst))
+	log("src-path:", JSON.stringify(src))
 
-	fetch(src).
-	then( response => {
-		if (!response.ok) {
-			element.innerHTML = '<article><h1>Not Found</h1></article>'
-			throw new Error('network response was not ok')
-		}
+	const response = await fetch(src)
+	if (!response.ok) {
+		element.innerHTML = '<article><h1>Not Found</h1></article>'
+		logerror("src file not found")
+		log("end")
+		throw new Error('network response was not ok')
+	}
+	log("src file found")
 
-		log("src found")
-		return response.text()
-	}).
-	then( text => {
-		element.innerHTML = text
+	const text = await response.text()
 
-		return text
-	}).
-	then( () => {
+	// include the src file
+	setInnerHTML(element, text)
 
-		// Set the title of the page to the value of the first <h1> (if there is an <h1>).
-
-		const h1s = element.getElementsByTagName("h1")
-		if (undefined === h1s || element.length <= 0) {
-			return
-		}
-		const h1 = h1s[0]
-
-		const titles = document.getElementsByTagName("title")
-		if (undefined === titles || titles.length <= 0) {
-			return
-		}
-		const title = titles[0]
-
-		const titleText = h1.innerText
-		console.log("[dst] title-text: ", titleText)
-		title.innerText = titleText
-
-	});
+	// Set the title of the page to the value of the first <h1> (if there is an <h1>).
+	setTitle(element)
 
 	log("end")
 }
@@ -100,4 +80,47 @@ export function include(element) {
 function log(...args) {
 	args.unshift("[asan][include]");
 	console.log(...args);
+}
+
+function logerror(...args) {
+	args.unshift("[asan][include] ERROR:");
+	console.error(...args);
+}
+
+function setInnerHTML(element, text) {
+	if (undefined === element) {
+		logerror("element is undefined")
+		return
+	}
+
+	element.innerHTML = text
+	log("src file included")
+}
+
+function setTitle(element) {
+	if (undefined === element) {
+		logerror("element is undefined")
+		return
+	}
+
+	const h1s = element.getElementsByTagName("h1")
+	if (undefined === h1s || element.length <= 0) {
+		logerror("<h1>s is undefined")
+		return
+	}
+	const h1 = h1s[0]
+	log("src file has at least 1 <h1> element — will set the same value of <title> to the same value of this first <h1>")
+
+	const titleText = h1.innerText
+	log("first <h1>'s value:", JSON.stringify(titleText))
+
+	const titles = document.getElementsByTagName("title")
+	if (undefined === titles || titles.length <= 0) {
+		logerror("<title>s is undefined")
+		return
+	}
+	const title = titles[0]
+
+	title.innerText = titleText
+	log("value of <title> set to value of first <h1> in included src file")
 }
