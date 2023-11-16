@@ -1,6 +1,6 @@
 # asan.js
 
-**asan.js** is a **convention over configuration** model-view system for web-sites and web-applicastions.
+**asan.js** is a **convention-over-configuration** model-view system for web-sites and web-applications.
 
 The attaction of using **asan** is that the location of the **model** for a path is very straight-forward
 
