@@ -43,19 +43,19 @@ THE SOFTWARE.
 // It then includes the HTML it fetched from the 'src' path here into the 'dst'.
 // It then sets the title of the page to the inner-text for the first <h1> from the 'src'.
 export function include(element) {
-	console.log("[asan][include] begin")
+	log("begin")
 
 	if (undefined === element) {
-		console.log("[asan][include] element is undefined")
-		console.log("[asan][include] end")
+		log("element is undefined")
+		log("end")
 		return
 	}
 
 	let dst = window.location.pathname
 	let src = "/src" + dst
 
-	console.log("[asan][include] dst-path: ", dst)
-	console.log("[asan][include] src-path: ", src)
+	log("dst-path: ", dst)
+	log("src-path: ", src)
 
 	fetch(src).
 	then( response => {
@@ -64,7 +64,7 @@ export function include(element) {
 			throw new Error('network response was not ok')
 		}
 
-		console.log("[asan][include] src found")
+		log("src found")
 		return response.text()
 	}).
 	then( text => {
@@ -94,5 +94,10 @@ export function include(element) {
 
 	});
 
-	console.log("[asan][include] end")
+	log("end")
+}
+
+function log(...args) {
+	args.unshift("[asan][include]");
+	console.log(...args);
 }
